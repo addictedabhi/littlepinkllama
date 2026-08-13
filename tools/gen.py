@@ -52,7 +52,8 @@ def head(title, root):
 def header(root, active=''):
     def cls(k):
         return ' class="active"' if k == active else ''
-    return f'''<div class="announcement">FREE SHIPPING ACROSS INDIA</div>
+    marquee_item = '<p class="announcement-text">FREE SHIPPING ACROSS INDIA</p><span class="announcement-sep" aria-hidden="true">\U0001F69A</span>' * 6
+    return f'''<div class="announcement" aria-label="FREE SHIPPING ACROSS INDIA"><div class="announcement-track">{marquee_item}</div></div>
 <header class="site-header">
   <div class="header-inner">
     <a class="logo" href="{root}index.html"><img src="{root}assets/images/site/logo.png" alt="Little Pink Llama"></a>
