@@ -122,13 +122,76 @@ cards = ''.join(
     for slug, t, d, ex in posts)
 page('blogs/index.html', 'Blogs', f'<main><div class="page-width"><div class="collection-header"><h1>Blogs</h1></div><div class="blog-grid" style="padding:20px 0 40px">{cards}</div></div></main>', 'blogs')
 
+from html.parser import HTMLParser
+
+
+class ArticleRebuilder(HTMLParser):
+    """Re-emit only whitelisted content tags, guaranteed balanced."""
+    KEEP = {'p', 'h2', 'h3', 'h4', 'ul', 'ol', 'li', 'strong', 'em', 'b', 'i',
+            'blockquote', 'table', 'thead', 'tbody', 'tr', 'td', 'th', 'a'}
+    SKIP_TEXT_IN = {'script', 'style', 'button', 'svg', 'form', 'noscript'}
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.out = []
+        self.stack = []
+        self.skip_depth = 0
+
+    def handle_starttag(self, tag, attrs):
+        if tag in self.SKIP_TEXT_IN:
+            self.skip_depth += 1
+            return
+        if tag in self.KEEP:
+            if tag == 'a':
+                href = dict(attrs).get('href', '#')
+                self.out.append('<a href="%s" target="_blank" rel="noopener">' % html.escape(href, quote=True))
+            else:
+                self.out.append('<%s>' % tag)
+            self.stack.append(tag)
+
+    def handle_endtag(self, tag):
+        if tag in self.SKIP_TEXT_IN:
+            self.skip_depth = max(0, self.skip_depth - 1)
+            return
+        if tag in self.KEEP and tag in self.stack:
+            # close any inner unclosed tags first to stay balanced
+            while self.stack:
+                top = self.stack.pop()
+                self.out.append('</%s>' % top)
+                if top == tag:
+                    break
+
+    def handle_data(self, data):
+        if self.skip_depth == 0:
+            self.out.append(html.escape(data))
+
+    def result(self):
+        while self.stack:
+            self.out.append('</%s>' % self.stack.pop())
+        r = ''.join(self.out)
+        r = re.sub(r'<(p|li|h2|h3|h4|blockquote)>\s*</\1>', '', r)
+        return r
+
+
+def rebuild_article(raw):
+    # start at first real paragraph of the article body
+    m = re.search(r'<p[ >]', raw)
+    raw = raw[m.start():] if m else raw
+    rb = ArticleRebuilder()
+    rb.feed(raw)
+    return rb.result()
+
+
 for slug, t, d, ex in posts:
     raw = load('blogs_news_%s_main.html' % slug)
-    art = sanitize(raw, ROOT)
-    # strip everything before the first heading remnants / share text
-    art = re.sub(r'Share\s*Link\s*Close share\s*Copy link', '', art)
-    art = re.sub(r'<h1>.*?</h1>', '', art, count=1, flags=re.S)
-    inner = f'<main><div class="blog-post"><h1>{html.escape(t)}</h1><time>{d}</time>{art}</div></main>'
+    art = rebuild_article(raw)
+    # drop share-widget remnants
+    art = re.sub(r'Share\s*(Link\s*)?(Close share\s*)?(Copy link)?', '', art)
+    inner = f'''<main><div class="blog-post">
+<p class="breadcrumb" style="padding:0 0 14px"><a href="{ROOT}blogs/index.html">← All blogs</a></p>
+<h1>{html.escape(t)}</h1><time>{d}</time>
+<div class="blog-body">{art}</div>
+</div></main>'''
     page('blogs/%s.html' % slug, t, inner, 'blogs')
 
 # ---- Sitemap ----

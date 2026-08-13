@@ -198,9 +198,15 @@ h1, h2, h3 { font-family: var(--font-heading); font-weight: 600; line-height: 1.
 .blog-post { max-width: 760px; margin: 0 auto; padding: 44px 20px; }
 .blog-post h1 { font-size: 1.9rem; color: var(--pink-dark); margin-bottom: 8px; }
 .blog-post time { color: var(--muted); font-size: 0.85rem; display: block; margin-bottom: 24px; }
-.blog-post h2 { margin: 26px 0 10px; }
-.blog-post p, .blog-post li { color: #444; margin-bottom: 12px; }
-.blog-post ul, .blog-post ol { margin: 0 0 14px 22px; }
+.blog-post h2 { margin: 30px 0 12px; font-size: 1.4rem; }
+.blog-post h3 { margin: 22px 0 10px; font-size: 1.15rem; }
+.blog-post p, .blog-post li { color: #444; margin-bottom: 12px; font-size: 1rem; }
+.blog-post ul, .blog-post ol { margin: 0 0 16px 22px; }
+.blog-post blockquote { border-left: 4px solid var(--pink); background: var(--pink-bg); padding: 14px 18px; border-radius: 0 10px 10px 0; margin: 0 0 16px; }
+.blog-post table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.92rem; display: block; overflow-x: auto; }
+.blog-post td, .blog-post th { border: 1px solid #f3c3dc; padding: 9px 12px; text-align: left; }
+.blog-post th { background: var(--pink-soft); }
+.blog-post a { text-decoration: underline; }
 
 /* FAQ accordion */
 .faq-item { border-bottom: 1px solid #f3d5e5; }
