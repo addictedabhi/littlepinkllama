@@ -82,7 +82,7 @@ h1, h2, h3 { font-family: var(--font-heading); font-weight: 600; line-height: 1.
 .slide { display: none; position: relative; }
 .slide.active { display: block; }
 .slide img { width: 100%; height: auto; object-fit: cover; min-height: 320px; max-height: 640px; }
-.slide-content { position: absolute; left: 6%; top: 50%; transform: translateY(-50%); max-width: 480px; background: rgba(255,255,255,0.35); padding: 28px 32px; border-radius: var(--radius); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.slide-content { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); max-width: 480px; text-align: center; background: rgba(255,255,255,0.35); padding: 28px 32px; border-radius: var(--radius); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
 .slide-content h1, .slide-content h2 { font-size: 2.1rem; color: var(--pink-dark); margin-bottom: 8px; }
 .slide-content p { margin-bottom: 16px; color: var(--muted); }
 .hero-dots { position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; }
