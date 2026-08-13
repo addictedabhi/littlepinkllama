@@ -1,4 +1,25 @@
 /* Little Pink Llama — static replica styles */
+/* Fonts: Jost + Roboto Serif (SIL OFL), self-hosted — same families as the live store */
+@font-face {
+  font-family: "Jost"; font-style: normal; font-weight: 400; font-display: swap;
+  src: url("../fonts/jost-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Jost"; font-style: normal; font-weight: 700; font-display: swap;
+  src: url("../fonts/jost-700.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Jost"; font-style: italic; font-weight: 400; font-display: swap;
+  src: url("../fonts/jost-400i.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Jost"; font-style: italic; font-weight: 700; font-display: swap;
+  src: url("../fonts/jost-700i.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Roboto Serif"; font-style: normal; font-weight: 600; font-display: swap;
+  src: url("../fonts/roboto-serif-600.woff2") format("woff2");
+}
 :root {
   --pink: #e91e8c;
   --pink-dark: #c2185b;
@@ -13,7 +34,8 @@
   --insta3: #8134af;
   --radius: 14px;
   --shadow: 0 6px 24px rgba(233, 30, 140, 0.10);
-  --font: "Poppins", "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+  --font: "Jost", "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+  --font-heading: "Roboto Serif", Georgia, "Times New Roman", serif;
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { scroll-behavior: smooth; }
@@ -21,7 +43,7 @@ body { font-family: var(--font); color: var(--ink); background: #fff; line-heigh
 img { max-width: 100%; display: block; }
 a { color: var(--pink-dark); text-decoration: none; }
 .page-width { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-h1, h2, h3 { font-weight: 600; line-height: 1.25; }
+h1, h2, h3 { font-family: var(--font-heading); font-weight: 600; line-height: 1.25; }
 .section-title { text-align: center; font-size: 1.9rem; margin: 0 0 28px; }
 .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 26px; border-radius: 999px; font-weight: 600; font-size: 0.95rem; border: none; cursor: pointer; transition: transform .15s ease, box-shadow .15s ease; }
 .btn:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
@@ -60,7 +82,7 @@ h1, h2, h3 { font-weight: 600; line-height: 1.25; }
 .slide { display: none; position: relative; }
 .slide.active { display: block; }
 .slide img { width: 100%; height: auto; object-fit: cover; min-height: 320px; max-height: 640px; }
-.slide-content { position: absolute; left: 6%; top: 50%; transform: translateY(-50%); max-width: 480px; background: rgba(255,255,255,0.85); padding: 28px 32px; border-radius: var(--radius); backdrop-filter: blur(2px); }
+.slide-content { position: absolute; left: 6%; top: 50%; transform: translateY(-50%); max-width: 480px; background: rgba(255,255,255,0.35); padding: 28px 32px; border-radius: var(--radius); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
 .slide-content h1, .slide-content h2 { font-size: 2.1rem; color: var(--pink-dark); margin-bottom: 8px; }
 .slide-content p { margin-bottom: 16px; color: var(--muted); }
 .hero-dots { position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; }

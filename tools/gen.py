@@ -90,7 +90,7 @@ def footer(root):
         <h4>Little Pink Llama</h4>
         <p>Handcrafted accessories for little dreamers — elegant, comfortable &amp; made with love.</p>
         <ul>
-          <li>Phone Number - +91 94600 74404</li>
+          <li>Phone Number - +91 99998 25527</li>
           <li>Email - lplkidscouture@gmail.com</li>
         </ul>
         <div class="footer-social">
@@ -211,7 +211,7 @@ def build_home():
 
     tst = [
         ("Thank you so much dear for the timely delivery.. she was very happy to see them, specially the note written by you. She was very happy to see the message.. the quality of brooches is really very good.. just loved them.", "Shilpa Lahar Bathla"),
-        ("The brooch is so beautifully made! The detailing is exquisite and it feels very premium. My daughter wore it on her dress, and everyone asked where it was from. Can you create 4 giraffe brooches as well? Would need by 25th Sept.", "Anisha - Richa (Jaipur)"),
+        ("The brooch is so beautifully made! The detailing is exquisite and it feels very premium. My daughter wore it on her dress, and everyone asked where it was from. Can you create 4 giraffe brooches as well? Would need by 25th Sept.", "Richa (Jaipur)"),
         ("Thank you Little Pink Llama, just received the towel and bathrobe set. Love the quality. Need something for a baby shower, do you do hampers??", "Divya Silot"),
     ]
     testis = '<section class="section section-alt"><div class="page-width"><h2 class="section-title">What Parents Are Saying</h2><div class="testimonials-grid">'
@@ -219,13 +219,7 @@ def build_home():
         testis += f'<div class="testimonial"><div class="stars">★★★★★</div><p>{html.escape(q)}</p><cite>- {html.escape(a)}</cite></div>'
     testis += '</div></div></section>\n'
 
-    news = '''<section class="section"><div class="page-width newsletter">
-<h2 class="section-title">Stay in the loop</h2>
-<p>New designs, festive launches &amp; little surprises — straight to you.</p>
-<form><input type="email" placeholder="Your email" required aria-label="Email"><button class="btn btn-pink" type="submit">Subscribe</button></form>
-</div></section>\n'''
-
-    page = head('Little Pink Llama | Handcrafted Kids Accessories & Toys', root) + header(root, 'home') + '<main>' + hero + shop_coll + latest + bulk + featured + testis + news + '</main>' + footer(root)
+    page = head('Little Pink Llama | Handcrafted Kids Accessories & Toys', root) + header(root, 'home') + '<main>' + hero + shop_coll + latest + bulk + featured + testis + '</main>' + footer(root)
     write('index.html', page)
 
 

@@ -98,7 +98,7 @@ contact_inner = f'''<main><div class="content-page">
   </form>
   <div class="contact-card">
     <h3>Reach us directly</h3>
-    <p>Phone / WhatsApp: <strong>+91 94600 74404</strong></p>
+    <p>Phone / WhatsApp: <strong>+91 99998 25527</strong></p>
     <p>Email: <strong>lplkidscouture@gmail.com</strong></p>
     <p>Instagram: <a href="{IG}" target="_blank" rel="noopener">@little_pink_llama_</a></p>
     <p style="margin-top:18px"><a class="btn btn-whatsapp" href="{wa_link('Hi Little Pink Llama! I have a question.')}" target="_blank" rel="noopener">{SVG_WA} Chat on WhatsApp</a></p>
