@@ -1,0 +1,1 @@
+# Role memory — developer — littlepinkllama
