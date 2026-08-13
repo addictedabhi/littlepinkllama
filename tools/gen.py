@@ -43,7 +43,7 @@ def head(title, root):
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{html.escape(title)}</title>
 <link rel="icon" type="image/png" href="{root}assets/images/site/favicon.png">
-<link rel="stylesheet" href="{root}assets/css/style.css">
+<link rel="stylesheet" href="{root}assets/css/style.css?v=3">
 </head>
 <body>
 '''
