@@ -1,0 +1,16 @@
+{
+  "artboards": [
+    { "file": "DirectionA.dc.html", "x": 0, "y": 0, "w": 1440, "h": 1450, "title": "A — Handmade Warmth (Desktop)" },
+    { "file": "DirectionA-Mobile.dc.html", "x": 1560, "y": 0, "w": 390, "h": 1300, "title": "A — Handmade Warmth (Mobile)" },
+    { "file": "DirectionB.dc.html", "x": 0, "y": 1600, "w": 1440, "h": 1500, "title": "B — Playful Scrapbook (Desktop)" },
+    { "file": "DirectionB-Mobile.dc.html", "x": 1560, "y": 1600, "w": 390, "h": 1300, "title": "B — Playful Scrapbook (Mobile)" },
+    { "file": "DirectionC.dc.html", "x": 0, "y": 3200, "w": 1440, "h": 1500, "title": "C — Bold Storybook (Desktop)" },
+    { "file": "DirectionC-Mobile.dc.html", "x": 1560, "y": 3200, "w": 390, "h": 1300, "title": "C — Bold Storybook (Mobile)" }
+  ],
+  "annotations": [
+    { "id": "note-a", "x": 0, "y": -110, "w": 500, "text": "Direction A — Handmade Warmth\nRefines the current palette: warm cream ground, serif headings (Fraunces), rounded photo cards with soft shadows. Closest to today's site — lowest translation effort, safest evolution." },
+    { "id": "note-b", "x": 0, "y": 1490, "w": 500, "text": "Direction B — Playful Scrapbook\nButter-cream ground, chunky rounded 'Baloo 2' display font, polaroid-style tilted hero photo, washi-tape accents. Leans hardest into 'handmade for kids' — most distinctive, most novel to build." },
+    { "id": "note-c", "x": 0, "y": 3090, "w": 500, "text": "Direction C — Bold Storybook\nDeep maroon + cream, editorial Playfair Display serif, asymmetric split hero, minimal-border product cards. Most premium/boutique feel — trades candy-bright cheer for craft-forward elegance." }
+  ],
+  "launch": { "view": "canvas" }
+}
