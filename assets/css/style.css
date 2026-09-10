@@ -97,7 +97,7 @@ h1, h2, h3 { font-family: var(--font-heading); font-weight: 600; line-height: 1.
 .hero { position: relative; overflow: hidden; }
 .slide { display: none; position: relative; }
 .slide.active { display: block; }
-.slide img { width: 100%; height: auto; object-fit: cover; min-height: 320px; max-height: 640px; }
+.slide img { width: 100%; height: auto; object-fit: cover; aspect-ratio: 2.27/1; max-height: 560px; object-position: center 30%; }
 .slide-content { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); max-width: 480px; text-align: center; background: rgba(255,255,255,0.35); padding: 28px 32px; border-radius: var(--radius); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
 .slide-content h1, .slide-content h2 { font-size: 2.1rem; color: var(--pink-dark); margin-bottom: 8px; }
 .slide-content p { margin-bottom: 16px; color: var(--muted); }
@@ -233,7 +233,7 @@ h1, h2, h3 { font-family: var(--font-heading); font-weight: 600; line-height: 1.
 .faq-item div { padding: 0 0 16px; color: var(--muted); font-size: 0.95rem; }
 
 /* Floating WhatsApp */
-.float-wa { position: fixed; right: 22px; bottom: 22px; z-index: 90; width: 58px; height: 58px; border-radius: 50%; background: var(--whatsapp); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 18px rgba(0,0,0,0.25); transition: transform .15s; }
+.float-wa { position: fixed; right: 22px; bottom: 22px; z-index: 90; width: 58px; height: 58px; border-radius: 50%; background: var(--whatsapp); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 18px rgba(0,0,0,0.25), 0 0 0 4px #fff; transition: transform .15s; }
 .float-wa:hover { transform: scale(1.08); }
 .float-wa svg { width: 32px; height: 32px; fill: #fff; }
 
@@ -254,8 +254,10 @@ h1, h2, h3 { font-family: var(--font-heading); font-weight: 600; line-height: 1.
   .dropdown-menu { position: static; visibility: visible; opacity: 1; transform: none; margin-left: 0; border: none; box-shadow: none; padding: 0 0 0 16px; min-width: 0; }
   .dropdown-menu::before { display: none; }
   .menu-toggle { display: block; }
-  .slide-content { position: static; transform: none; max-width: none; border-radius: 0; }
+  .slide img { aspect-ratio: 4/3; object-position: center 20%; }
+  .slide-content { position: static; transform: none; max-width: none; border-radius: 0; background: var(--pink-bg); backdrop-filter: none; padding: 24px 20px; }
   .slide-content h1, .slide-content h2 { font-size: 1.4rem; }
+  .bulk-banner img { min-height: 0; aspect-ratio: 4/3; }
 }
 @media (max-width: 540px) {
   .product-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
