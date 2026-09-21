@@ -18,6 +18,24 @@ colls = {}
 for c in ['brooches', 'hairclips', 'crochet-toys', 'collar', 'rakhis', 'featured-products']:
     colls[c] = [p['handle'] for p in json.load(open(os.path.join(SCRATCH, f'coll_{c}.json'), encoding='utf-8'))['products']]
 
+# Singular product-type noun per real collection (excludes 'featured-products',
+# which is a curated cross-section, not a type). Used to build keyword-rich
+# product titles/descriptions when the product name itself doesn't say the
+# type (e.g. "Bunny", "Ruby Sparkle") — Shopify's product_type/tags fields
+# came back empty from the scrape, so this collection membership is the only
+# type signal available.
+COLLECTION_NOUN = {
+    'brooches': 'brooch', 'hairclips': 'hair clip', 'crochet-toys': 'crochet toy',
+    'collar': 'collar', 'rakhis': 'rakhi',
+}
+
+
+def product_type_noun(handle):
+    for key, noun in COLLECTION_NOUN.items():
+        if handle in colls.get(key, []):
+            return noun
+    return 'accessory'
+
 SVG_WA = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.5 14.4l-2.1-1c-.3-.1-.5-.1-.7.1l-1 1.2c-.2.2-.4.2-.6.1-.8-.4-2.5-1.5-3.5-3.4-.1-.2-.1-.4.1-.6l.9-1.1c.2-.2.2-.5.1-.7l-1-2.2c-.2-.5-.7-.6-1.1-.4-1 .6-1.8 1.5-1.8 2.6 0 .5.1 1.1.4 1.7 1 2.2 2.8 4 5 5.1.9.4 1.6.7 2.2.7 1.2 0 2.3-.7 2.8-1.8.2-.5 0-1-.7-1.3zM12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2zm0 18.2c-1.6 0-3.1-.4-4.4-1.2l-.3-.2-3 .8.8-3-.2-.3A8.2 8.2 0 1 1 12 20.2z"/></svg>'
 SVG_IG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2c3.2 0 3.6 0 4.9.1 1.2.1 1.8.2 2.2.4.6.2 1 .5 1.4.9.4.4.7.8.9 1.4.2.4.4 1 .4 2.2.1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c-.1 1.2-.2 1.8-.4 2.2-.2.6-.5 1-.9 1.4-.4.4-.8.7-1.4.9-.4.2-1 .4-2.2.4-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-1.2-.1-1.8-.2-2.2-.4-.6-.2-1-.5-1.4-.9-.4-.4-.7-.8-.9-1.4-.2-.4-.4-1-.4-2.2C2.2 15.6 2.2 15.2 2.2 12s0-3.6.1-4.9c.1-1.2.2-1.8.4-2.2.2-.6.5-1 .9-1.4.4-.4.8-.7 1.4-.9.4-.2 1-.4 2.2-.4C8.4 2.2 8.8 2.2 12 2.2zm0 1.8c-3.1 0-3.5 0-4.8.1-1.1.1-1.5.2-1.8.3-.5.2-.8.4-1.1.7-.3.3-.5.6-.7 1.1-.1.3-.3.7-.3 1.8-.1 1.3-.1 1.7-.1 4.8s0 3.5.1 4.8c.1 1.1.2 1.5.3 1.8.2.5.4.8.7 1.1.3.3.6.5 1.1.7.3.1.7.3 1.8.3 1.3.1 1.7.1 4.8.1s3.5 0 4.8-.1c1.1-.1 1.5-.2 1.8-.3.5-.2.8-.4 1.1-.7.3-.3.5-.6.7-1.1.1-.3.3-.7.3-1.8.1-1.3.1-1.7.1-4.8s0-3.5-.1-4.8c-.1-1.1-.2-1.5-.3-1.8-.2-.5-.4-.8-.7-1.1-.3-.3-.6-.5-1.1-.7-.3-.1-.7-.3-1.8-.3-1.3-.1-1.7-.1-4.8-.1zm0 3.1a4.9 4.9 0 1 1 0 9.8 4.9 4.9 0 0 1 0-9.8zm0 8.1a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4zm6.2-8.3a1.1 1.1 0 1 1-2.3 0 1.1 1.1 0 0 1 2.3 0z"/></svg>'
 SVG_FB = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.3c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.4v7A10 10 0 0 0 22 12z"/></svg>'
@@ -35,16 +53,51 @@ def wa_link(text):
     return 'https://wa.me/%s?text=%s' % (WA, quote(text))
 
 
-def head(title, root):
+SITE_URL = "https://littlepinkllama.com"
+DEFAULT_OG_IMAGE = "assets/images/site/logo.png"
+
+
+def head(title, root, description=None, canonical_path='', og_image=None, og_type='website', schema=None, noindex=False):
+    """Page <head>. `canonical_path` is the page's path relative to site root
+    (e.g. 'products/llama-brooch.html', '' for homepage) — used for both the
+    canonical link and absolute OG/Twitter URLs. `schema` is a dict (or list
+    of dicts) of JSON-LD to embed; omit for none. `noindex=True` for pages
+    that should stay crawlable but excluded from search results (404)."""
+    desc = description or 'Handcrafted brooches, hairclips, crochet toys and rakhis for kids — made with love in Jaipur, India. Order on WhatsApp or Instagram.'
+    desc_esc = html.escape(desc)
+    canonical_url = f"{SITE_URL}/{canonical_path}" if canonical_path else f"{SITE_URL}/"
+    image_path = og_image or DEFAULT_OG_IMAGE
+    image_url = f"{SITE_URL}/{image_path}"
+
+    schema_tag = ''
+    if schema is not None:
+        schema_json = json.dumps(schema, ensure_ascii=False, indent=None)
+        # </script> can't appear literally inside a script body
+        schema_json = schema_json.replace('</', '<\\/')
+        schema_tag = f'<script type="application/ld+json">{schema_json}</script>\n'
+
+    robots_tag = '<meta name="robots" content="noindex, follow">\n' if noindex else ''
     return f'''<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{html.escape(title)}</title>
+<meta name="description" content="{desc_esc}">
+{robots_tag}<link rel="canonical" href="{canonical_url}">
 <link rel="icon" type="image/png" href="{root}assets/images/site/favicon.png">
 <link rel="stylesheet" href="{root}assets/css/style.css?v=3">
-</head>
+<meta property="og:site_name" content="Little Pink Llama">
+<meta property="og:type" content="{og_type}">
+<meta property="og:title" content="{html.escape(title)}">
+<meta property="og:description" content="{desc_esc}">
+<meta property="og:url" content="{canonical_url}">
+<meta property="og:image" content="{image_url}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{html.escape(title)}">
+<meta name="twitter:description" content="{desc_esc}">
+<meta name="twitter:image" content="{image_url}">
+{schema_tag}</head>
 <body>
 '''
 
@@ -143,8 +196,9 @@ def card(h, root):
     src = f'{root}assets/images/products/{img[0]}' if img else f'{root}assets/images/site/logo.png'
     price = rs(p['variants'][0]['price'])
     wa = wa_link(f"Hi! I'd like to order the {p['title']} ({price}). Is it available?")
+    alt = f"{p['title']} — handmade kids accessory by Little Pink Llama"
     return f'''<div class="product-card">
-  <a href="{root}products/{h}.html"><img src="{src}" alt="{html.escape(p['title'])}" loading="lazy"></a>
+  <a href="{root}products/{h}.html"><img src="{src}" alt="{html.escape(alt)}" loading="lazy"></a>
   <div class="card-info">
     <h3><a href="{root}products/{h}.html">{html.escape(p['title'])}</a></h3>
     <span class="price">{price}</span>
@@ -171,11 +225,12 @@ def build_home():
         ('assets/images/site/website_banner_seamless_d6756001-9fcc-45d6-af46-e2035690ad43.jpg', 'Crochet Magic for Tiny Hearts', 'Soft, safe and lovingly handcrafted toys', 'collections/crochet-toys.html'),
     ]
     hero = '<section class="hero">\n'
-    for i, (img, h1, sub, link) in enumerate(slides):
+    for i, (img, htext, sub, link) in enumerate(slides):
+        heading_tag = 'h1' if i == 0 else 'h2'  # exactly one H1 on the page, first slide carries it
         hero += f'''<div class="slide{' active' if i == 0 else ''}">
-  <img src="{img}" alt="{html.escape(h1)}">
+  <img src="{img}" alt="{html.escape(htext)} — handmade kids accessory, Little Pink Llama">
   <div class="slide-content">
-    <h2>{h1}</h2>
+    <{heading_tag}>{htext}</{heading_tag}>
     <p>{sub}</p>
     <a class="btn btn-pink" href="{link}">Shop Now</a>
   </div>
@@ -220,31 +275,74 @@ def build_home():
         testis += f'<div class="testimonial"><div class="stars">★★★★★</div><p>{html.escape(q)}</p><cite>- {html.escape(a)}</cite></div>'
     testis += '</div></div></section>\n'
 
-    page = head('Little Pink Llama | Handcrafted Kids Accessories & Toys', root) + header(root, 'home') + '<main>' + hero + shop_coll + latest + bulk + featured + testis + '</main>' + footer(root)
+    org_schema = {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Little Pink Llama",
+        "url": f"{SITE_URL}/",
+        "logo": f"{SITE_URL}/assets/images/site/logo.png",
+        "sameAs": [IG, FB],
+        "contactPoint": {
+            "@type": "ContactPoint",
+            "telephone": "+91-99998-25527",
+            "contactType": "customer service",
+        },
+    }
+    website_schema = {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Little Pink Llama",
+        "url": f"{SITE_URL}/",
+    }
+    home_desc = ('Handcrafted kids accessories made with love in Jaipur — brooches, hair clips, '
+                 'crochet toys & collars. Free shipping across India. Order on WhatsApp/Instagram.')
+    page = head(
+        'Little Pink Llama | Premium Kids Accessories, Handmade India',
+        root,
+        description=home_desc,
+        canonical_path='',
+        schema=[org_schema, website_schema],
+    ) + header(root, 'home') + '<main>' + hero + shop_coll + latest + bulk + featured + testis + '</main>' + footer(root)
     write('index.html', page)
 
 
 def build_collections():
     root = '../'
+    # (title, on-page intro text, plural noun used in meta description)
     descs = {
-        'all': ('Shop All', 'Every handcrafted piece — brooches, hair clips, crochet toys, collars & rakhis.'),
-        'brooches': ('Brooches', 'Playful handcrafted brooches for every giggle.'),
-        'hairclips': ('Hairclips', 'Adorable clips for your little star.'),
-        'crochet-toys': ('Crochet toys', 'Crochet magic for tiny hearts.'),
-        'collar': ('Collar', 'Elegant handcrafted collars.'),
-        'rakhis': ('Rakhis', 'Handmade rakhis full of love.'),
-        'featured-products': ('Featured Products', 'Our most loved picks, handcrafted in Jaipur.'),
+        'all': ('Shop All', 'Every handcrafted piece — brooches, hair clips, crochet toys, collars & rakhis.', 'pieces'),
+        'brooches': ('Brooches', 'Playful handcrafted brooches for every giggle.', 'brooches'),
+        'hairclips': ('Hairclips', 'Adorable clips for your little star.', 'hairclips'),
+        'crochet-toys': ('Crochet toys', 'Crochet magic for tiny hearts.', 'crochet toys'),
+        'collar': ('Collar', 'Elegant handcrafted collars.', 'collars'),
+        'rakhis': ('Rakhis', 'Handmade rakhis full of love.', 'rakhis'),
+        'featured-products': ('Featured Products', 'Our most loved picks, handcrafted in Jaipur.', 'picks'),
     }
     lists = dict(colls)
     lists['all'] = list(prods.keys())
-    for key, (title, desc) in descs.items():
+    for key, (title, desc, noun) in descs.items():
         handles = [h for h in lists[key] if h in prods]
         body = f'''<main><div class="page-width">
 <div class="breadcrumb"><a href="{root}index.html">Home</a> / {title}</div>
 <div class="collection-header"><h1>{title}</h1><p>{html.escape(desc)}</p></div>
 <div class="product-grid" style="padding:24px 0 40px">{''.join(card(h, root) for h in handles)}</div>
 </div></main>'''
-        page = head(f'{title} | Little Pink Llama', root) + header(root, 'shop') + body + footer(root)
+        meta_desc = f"{desc} Shop {len(handles)} handmade {noun} for kids from Jaipur, India."
+        breadcrumb_schema = {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                {"@type": "ListItem", "position": 1, "name": "Home", "item": f"{SITE_URL}/"},
+                {"@type": "ListItem", "position": 2, "name": title, "item": f"{SITE_URL}/collections/{key}.html"},
+            ],
+        }
+        page = head(
+            f'{title} | Little Pink Llama',
+            root,
+            description=meta_desc,
+            canonical_path=f'collections/{key}.html',
+            schema=breadcrumb_schema,
+        ) + header(root, 'shop') + body + footer(root)
         write(f'collections/{key}.html', page)
 
 
@@ -258,12 +356,24 @@ def clean_desc(bh):
     return bh
 
 
+def meta_description_from_html(body_html, fallback, limit=155):
+    text = re.sub(r'<[^>]+>', ' ', body_html or '')
+    text = html.unescape(text)
+    text = re.sub(r'\s+', ' ', text).strip()
+    if not text:
+        text = fallback
+    if len(text) > limit:
+        text = text[:limit].rsplit(' ', 1)[0].rstrip(',.;') + '…'
+    return text
+
+
 def build_products():
     root = '../'
     for h, p in prods.items():
         imgs = imgmap.get(h, [])
         title = p['title']
-        price = rs(p['variants'][0]['price'])
+        price_val = p['variants'][0]['price']
+        price = rs(price_val)
         variants = [v['title'] for v in p['variants'] if v['title'] != 'Default Title']
         vhtml = ''
         if variants:
@@ -271,8 +381,9 @@ def build_products():
             chips = ''.join(f'<span>{html.escape(v)}</span>' for v in variants)
             vhtml = f'<div class="variant-list"><h4>{html.escape(opt)}</h4><div class="variant-chips">{chips}</div></div>'
         main_src = f'{root}assets/images/products/{imgs[0]}' if imgs else f'{root}assets/images/site/logo.png'
+        main_alt = f"{title} — handmade kids accessory, Little Pink Llama"
         thumbs = ''.join(
-            f'<img src="{root}assets/images/products/{im}" data-full="{root}assets/images/products/{im}" alt="{html.escape(title)} view {i + 1}" class="{"active" if i == 0 else ""}" loading="lazy">'
+            f'<img src="{root}assets/images/products/{im}" data-full="{root}assets/images/products/{im}" alt="{html.escape(title)} — additional photo {i + 1}" class="{"active" if i == 0 else ""}" loading="lazy">'
             for i, im in enumerate(imgs))
         wa = wa_link(f"Hi! I'd like to order the {title} ({price}). Is it available?")
         desc = clean_desc(p.get('body_html', ''))
@@ -280,7 +391,7 @@ def build_products():
 <div class="breadcrumb"><a href="{root}index.html">Home</a> / <a href="{root}collections/all.html">Shop all</a> / {html.escape(title)}</div>
 <div class="product-layout">
   <div class="gallery">
-    <div class="gallery-main"><img src="{main_src}" alt="{html.escape(title)}"></div>
+    <div class="gallery-main"><img src="{main_src}" alt="{html.escape(main_alt)}"></div>
     <div class="gallery-thumbs">{thumbs}</div>
   </div>
   <div class="product-info">
@@ -297,7 +408,60 @@ def build_products():
   </div>
 </div>
 </div></main>'''
-        page = head(f'{title} | Little Pink Llama', root) + header(root, 'shop') + body + footer(root)
+        meta_desc = meta_description_from_html(
+            p.get('body_html', ''),
+            f"{title} — handmade for kids, {price}. Made in Jaipur. Order on WhatsApp or Instagram — free shipping across India.")
+        # Keyword-rich <title>: most products are named "Name - Type" (e.g.
+        # "Llama - Brooch"); rewrite to "Name Handmade Type for Kids" so the
+        # type/audience keywords lead instead of trailing after a dash. A
+        # few products (crochet toys, collar items) have no " - " in their
+        # name — fall back to collection-derived product_type_noun().
+        if ' - ' in title:
+            product_name, _, type_word = title.partition(' - ')
+            product_name, type_word = product_name.strip(), type_word.strip()
+            seo_title_base = f"{product_name} Handmade {type_word} for Kids"
+        else:
+            # No " - Type" suffix in the name (crochet toys, some collar
+            # items). Capitalize each word ("Small bear" -> "Small Bear"),
+            # preserving words that already carry internal capitals (e.g.
+            # "K-Pop"). Only append the type noun if the name doesn't
+            # already say it ("Guiding Star Hair Clip", "Derpy Tiger Collar").
+            product_name = ' '.join(w if any(c.isupper() for c in w[1:]) else w.capitalize() for w in title.split())
+            noun = product_type_noun(h)
+            if noun.lower() in title.lower():
+                seo_title_base = f"{product_name} — Handmade for Kids"
+            else:
+                seo_title_base = f"{product_name} — Handmade {noun.title()} for Kids"
+        # Drop the brand suffix when it would push past ~60 chars (SERP
+        # truncation risk) — same rule gen_pages.py's page() applies to
+        # long blog titles; the keyword-rich headline matters more than
+        # the trailing brand name once it no longer fits.
+        seo_title_full = f"{seo_title_base} | Little Pink Llama"
+        seo_title = seo_title_base if len(seo_title_full) > 60 else seo_title_full
+        schema = {
+            "@context": "https://schema.org",
+            "@type": "Product",
+            "name": title,
+            "image": [f"{SITE_URL}/assets/images/products/{im}" for im in imgs] or [f"{SITE_URL}/{DEFAULT_OG_IMAGE}"],
+            "description": meta_desc,
+            "brand": {"@type": "Brand", "name": "Little Pink Llama"},
+            "offers": {
+                "@type": "Offer",
+                "url": f"{SITE_URL}/products/{h}.html",
+                "priceCurrency": "INR",
+                "price": str(price_val),
+                "availability": "https://schema.org/InStock",
+            },
+        }
+        page = head(
+            seo_title,
+            root,
+            description=meta_desc,
+            canonical_path=f'products/{h}.html',
+            og_image=f'assets/images/products/{imgs[0]}' if imgs else None,
+            og_type='product',
+            schema=schema,
+        ) + header(root, 'shop') + body + footer(root)
         write(f'products/{h}.html', page)
 
 
